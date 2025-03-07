@@ -1,20 +1,48 @@
-export default function Avatar({userId,username,online}) {
-  const colors = ['bg-teal-200', 'bg-red-200',
-                  'bg-green-200', 'bg-purple-200',
-                  'bg-blue-200', 'bg-yellow-200',
-                  'bg-orange-200', 'bg-pink-200', 'bg-fuchsia-200', 'bg-rose-200'];
-  const userIdBase10 = parseInt(userId.substring(10), 16);
-  const colorIndex = userIdBase10 % colors.length;
-  const color = colors[colorIndex];
+import React, { memo } from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { getAvatarColor } from './utils/avatarUtils';
+
+function Avatar({ userId, username, online }) {
+  const color = getAvatarColor(userId);
+
+  const avatarClasses = classNames(
+    'w-8 h-8 relative rounded-full flex items-center',
+    color
+  );
+
   return (
-    <div className={"w-8 h-8 relative rounded-full flex items-center "+color}>
+    <div
+      className={avatarClasses}
+      role="img"
+      aria-label={`Avatar of ${username}`}
+    >
       <div className="text-center w-full opacity-70">{username[0]}</div>
-      {online && (
-        <div className="absolute w-3 h-3 bg-green-400 bottom-0 right-0 rounded-full border border-white"></div>
-      )}
-      {!online && (
-        <div className="absolute w-3 h-3 bg-gray-400 bottom-0 right-0 rounded-full border border-white"></div>
-      )}
+      <StatusIndicator online={online} />
     </div>
   );
 }
+
+function StatusIndicator({ online }) {
+  const statusClasses = classNames(
+    'absolute w-3 h-3 bottom-0 right-0 rounded-full border border-white',
+    {
+      'bg-green-400': online,
+      'bg-gray-400': !online,
+    }
+  );
+
+  return <div className={statusClasses} aria-label={online ? 'Online' : 'Offline'} />;
+}
+
+Avatar.propTypes = {
+  userId: PropTypes.string.isRequired,
+  username: PropTypes.string.isRequired,
+  online: PropTypes.bool,
+};
+
+Avatar.defaultProps = {
+  online: false,
+};
+
+export default memo(Avatar);
